@@ -85,7 +85,7 @@
 #define GPIO_PWM_ENABLED                            (0x70)
 #define GPIO_MEASUREMENT_INTERRUPT                  (0x6d)
 
-#include <i2c_t3.h>
+#include <i2c_t3.h> //Teensy 3 I2C library.
 
 #define BUFFER_SIZE 30
 
@@ -630,6 +630,9 @@ void setup() {
 
   Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_EXT, I2C_RATE_100);
   Serial.begin(115200);
+
+  //Stop bus locking up when I2C glitches occur.
+  Wire.setDefaultTimeout(10000);
 
   // initialize the LED pin as an output.
   pinMode(ledPin, OUTPUT);
