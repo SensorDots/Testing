@@ -628,13 +628,13 @@ void print_menu()
 }
 void setup() {
 
-  Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_EXT, I2C_RATE_400);
+  Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_EXT, I2C_RATE_100);
   Serial.begin(115200);
 
   // initialize the LED pin as an output.
   pinMode(ledPin, OUTPUT);
 
-  address = 0x0A;
+  address = 0x0b;
 }
 
       /*Wire.beginTransmission(address);
