@@ -622,6 +622,10 @@ void print_menu()
   Serial.println("o - filtering_disable");
   Serial.println("Y - averaging_enable");
   Serial.println("y - averaging_disable");
+  Serial.println("- - change_address");
+
+  Serial.print("Current address is: ");
+  Serial.println(address, DEC);
   
   Serial.println("");
 
@@ -637,13 +641,49 @@ void setup() {
   // initialize the LED pin as an output.
   pinMode(ledPin, OUTPUT);
 
-  address = 0x0b;
+  address = 0x08;
 }
 
       /*Wire.beginTransmission(address);
       Wire.write(READ_DISTANCE);
       Wire.endTransmission();
             delay(2);*/
+
+void change_address()
+{
+  char char_buffer[4] = {0};
+  uint8_t i = 0;
+  uint8_t was_set = 0;
+
+  Serial.print("Enter I2C address > 8 and < 112): ");
+  while(i < 4){
+    while(Serial.available() == 0){}
+    char character = Serial.read();
+    Serial.print(character);
+    char_buffer[i] = character;
+    i++;
+    if (character == '\r')
+    {
+      if (atoi(char_buffer) >= 8 && atoi(char_buffer) <= 112)
+      {
+        address = atoi(char_buffer);
+        was_set = 1;
+      }
+      i = 4;
+    }
+  }
+  
+  Serial.println("");
+  
+  if (was_set)
+  {
+    Serial.print("Address set to: ");
+    Serial.println(address, DEC);
+  } else {
+    Serial.println("Address not set");
+  }
+  
+}
 
 
 void loop() {
@@ -702,6 +742,7 @@ void loop() {
     case 'o': filtering_disable(); break;
     case 'Y': averaging_enable(); break;
     case 'y': averaging_disable(); break;
+    case '-': change_address(); break;
 
 
     default: print_menu(); break;
