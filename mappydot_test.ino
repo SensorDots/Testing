@@ -152,6 +152,13 @@ void measurement_mode_long_range()
   Wire.endTransmission();
 }
 
+void addr_in_test()
+{
+  Wire.beginTransmission(address);
+  Wire.write(0x2e);
+  Wire.endTransmission();
+}
+
 void measurement_mode_high_accurate()
 {
   Wire.beginTransmission(address);
@@ -623,12 +630,36 @@ void print_menu()
   Serial.println("Y - averaging_enable");
   Serial.println("y - averaging_disable");
   Serial.println("- - change_address");
+  Serial.println("? - calibration_routine");
+  Serial.println(". - addr_in_test");
 
   Serial.print("Current address is: ");
   Serial.println(address, DEC);
   
   Serial.println("");
 
+}
+
+void calibration_routine()
+{
+  set_led_mode_off();
+  
+  Wire.beginTransmission(address);
+  Wire.write(CALIBRATE_SPAD);
+  Wire.endTransmission();
+
+  delay(2000);
+
+  uint8_t calib_dist = 103;
+  uint8_t dist_bytes[2];
+  mm_to_bytes(dist_bytes, calib_dist);
+  Wire.beginTransmission(address);
+  Wire.write(CALIBRATE_DISTANCE_OFFSET);
+  Wire.write(dist_bytes[0]);
+  Wire.write(dist_bytes[1]);
+  Wire.endTransmission();
+  set_led_mode_pwm();
+  Serial.println("Calibration Complete");
 }
 void setup() {
 
@@ -743,6 +774,8 @@ void loop() {
     case 'Y': averaging_enable(); break;
     case 'y': averaging_disable(); break;
     case '-': change_address(); break;
+    case '?': calibration_routine(); break;
+    case '.': addr_in_test(); break;
 
 
     default: print_menu(); break;
