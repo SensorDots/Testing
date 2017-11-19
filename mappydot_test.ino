@@ -432,7 +432,7 @@ void set_gpio_mode_measurement()
 void simple_read() {
   /* Test simple read (after previous write too) */
   Wire.requestFrom(address, 2);
-  distance = Wire.read() << 8 | Wire.read();
+  distance = Wire.read() << 8; distance |= Wire.read(); 
   Serial.print("Simple: ");
   Serial.println(distance, DEC);
 }

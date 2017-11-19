@@ -26,7 +26,7 @@ const int ledPin = 13;
 
 void simple_read(uint8_t address) {
   Wire.requestFrom(address, 2);
-  uint16_t distance = Wire.read() << 8 | Wire.read();
+  uint16_t distance = Wire.read() << 8; distance |= Wire.read(); 
   Serial.print(address, DEC);
   Serial.print(",");
   Serial.println(distance, DEC);
