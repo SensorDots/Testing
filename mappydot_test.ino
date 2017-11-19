@@ -235,14 +235,14 @@ void filtering_disable()
 void averaging_enable()
 {
     Wire.beginTransmission(address);
-  Wire.write(FILTERING_ENABLE);
+  Wire.write(AVERAGING_ENABLE);
   Wire.endTransmission();
 }
 
 void averaging_disable()
 {
     Wire.beginTransmission(address);
-  Wire.write(FILTERING_DISABLE);
+  Wire.write(AVERAGING_DISABLE);
   Wire.endTransmission();
 }
 
