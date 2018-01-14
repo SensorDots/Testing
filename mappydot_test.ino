@@ -489,7 +489,7 @@ void read() {
   Wire.write(READ_DISTANCE);
   Wire.endTransmission(false); //repeated start
   Wire.requestFrom(address,2, true); 
-  distance = Wire.read() << 8 | Wire.read();
+  distance = Wire.read() << 8; distance |= Wire.read(); 
   Serial.print("Read: ");
   Serial.println(distance, DEC);
 }
@@ -498,7 +498,7 @@ void test_no_restart_read() {
   Wire.write(READ_DISTANCE);
   Wire.endTransmission(); //repeated start
   Wire.requestFrom(address,2); 
-  distance = Wire.read() << 8 | Wire.read();
+  distance = Wire.read() << 8; distance |= Wire.read(); 
   Serial.print("Read(NRS): ");
   Serial.println(distance, DEC);
 }
@@ -508,7 +508,7 @@ void test_non_filtered_distance() {
   Wire.write(READ_NONFILTERED_VALUE);
   Wire.endTransmission(false); //repeated start
   Wire.requestFrom(address,3, true);
-  distance = Wire.read() << 8 | Wire.read();
+  distance = Wire.read() << 8; distance |= Wire.read(); 
   Wire.read();
   Serial.print("NonFilt: ");
   Serial.println(distance, DEC);
