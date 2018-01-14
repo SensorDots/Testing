@@ -60,6 +60,7 @@
 #define VL53L0X_SHUTDOWN                            (0x68)
 #define READ_NONFILTERED_VALUE                      (0x6a)
 #define VL53L0X_PASSTHROUGH                         (0x70)
+#define CUSTOM_PROFILE_SETTINGS                     (0x6b)
 
 /* Super Advanced */
 #define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
@@ -70,6 +71,7 @@
 #define HIGH_SPEED                                  (0x73)
 #define VL53L0X_DEFAULT                             (0x64)
 #define MAPPYDOT_MODE                               (0x6d)
+#define CUSTOM                                      (0x63)
 
 /* LED Modes */
 #define LED_ON                                      (0x6f)
@@ -118,6 +120,43 @@ void device_name_write() {
   Wire.write("P");
   Wire.endTransmission();
 }
+
+
+
+void custom_settings_write_default_profile() {
+    /* Test set device name write */
+  Wire.beginTransmission(address);
+  Wire.write(CUSTOM_PROFILE_SETTINGS);
+  Wire.write(0x01);
+  Wire.write(0x08);
+  Wire.write(0xD5);
+  Wire.write(0x19);
+  Wire.write(0x12);
+  Wire.write(0x00);
+  Wire.write(0x21);
+  Wire.write(0x0E);
+  Wire.write(0x0A);
+
+  Wire.endTransmission();
+}
+
+void custom_settings_write_accurate_profile() {
+    /* Test set device name write */
+  Wire.beginTransmission(address);
+  Wire.write(CUSTOM_PROFILE_SETTINGS);
+  Wire.write(0x00);
+  Wire.write(0x00);
+  Wire.write(0x00);
+  Wire.write(0x19);
+  Wire.write(0x12);
+  Wire.write(0x00);
+  Wire.write(0xc8);
+  Wire.write(0x0E);
+  Wire.write(0x0A);
+
+  Wire.endTransmission();
+}
+
 /*
 #define CALIBRATE_DISTANCE_OFFSET                   (0x61)
 #define CALIBRATE_CROSSTALK                         (0x78)
@@ -151,6 +190,15 @@ void measurement_mode_long_range()
   Wire.write(LONG_RANGE);
   Wire.endTransmission();
 }
+
+void measurement_mode_custom()
+{
+  Wire.beginTransmission(address);
+  Wire.write(RANGING_MEASUREMENT_MODE);
+  Wire.write(CUSTOM);
+  Wire.endTransmission();
+}
+
 
 void addr_in_test()
 {
@@ -618,6 +666,7 @@ void print_menu()
   Serial.println("H - measurement_mode_high_speed");
   Serial.println("L - measurement_mode_long_range");
   Serial.println("A - measurement_mode_high_accurate");
+  Serial.println("c - measurement_mode_custom");
   Serial.println("I - intersensor_crosstalk_enable");
   Serial.println("i - intersensor_crosstalk_disable");
   Serial.println("V - reset_vl53l0x");
@@ -631,6 +680,8 @@ void print_menu()
   Serial.println("y - averaging_disable");
   Serial.println("- - change_address");
   Serial.println("? - calibration_routine");
+  Serial.println("k - custom_settings_write_default_profile");
+  Serial.println("K - custom_settings_write_accurate_profile");
   Serial.println(". - addr_in_test");
 
   Serial.print("Current address is: ");
@@ -775,6 +826,9 @@ void loop() {
     case 'y': averaging_disable(); break;
     case '-': change_address(); break;
     case '?': calibration_routine(); break;
+    case 'c': measurement_mode_custom(); break;
+    case 'k': custom_settings_write_default_profile(); break;
+    case 'K': custom_settings_write_accurate_profile(); break;
     case '.': addr_in_test(); break;
 
 
