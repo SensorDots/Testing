@@ -124,7 +124,6 @@ void device_name_write() {
 
 
 void custom_settings_write_default_profile() {
-    /* Test set device name write */
   Wire.beginTransmission(address);
   Wire.write(CUSTOM_PROFILE_SETTINGS);
   Wire.write(0x01);
@@ -141,7 +140,6 @@ void custom_settings_write_default_profile() {
 }
 
 void custom_settings_write_accurate_profile() {
-    /* Test set device name write */
   Wire.beginTransmission(address);
   Wire.write(CUSTOM_PROFILE_SETTINGS);
   Wire.write(0x00);
