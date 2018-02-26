@@ -482,7 +482,7 @@ void simple_read() {
   Serial.print("Simple: ");
   Serial.println(distance, DEC);
 }
-  //delay(60); //This tests if the simple read was working (value should change).
+
 void read() {
   /* Test Read Distance */
   Wire.beginTransmission(address);
@@ -595,8 +595,12 @@ void test_settings_read() {
   Wire.beginTransmission(address);
   Wire.write(READ_CURRENT_SETTINGS);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,14, true);
+  Wire.requestFrom(address,16, true);
   Serial.print("Settings: ");
+  Serial.print(Wire.read(),HEX);
+  Serial.print(",");
+  Serial.print(Wire.read(),HEX);
+  Serial.print(",");
   Serial.print(Wire.read(),HEX);
   Serial.print(",");
   Serial.print(Wire.read(),HEX);
