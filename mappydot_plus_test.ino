@@ -703,8 +703,8 @@ void print_menu()
   Serial.println("k - custom_settings_write_default_profile");
   Serial.println("K - custom_settings_write_accurate_profile");
   Serial.println(". - addr_in_test");
-  Serial.println("[ - void set_fov_27");
-  Serial.println("] - void set_fov_15");
+  Serial.println("[ - set_fov_27");
+  Serial.println("] - set_fov_15");
 
   Serial.print("Current address is: ");
   Serial.println(address, DEC);
