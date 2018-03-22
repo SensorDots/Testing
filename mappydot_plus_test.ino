@@ -46,6 +46,7 @@
 #define INTERSENSOR_CROSSTALK_REDUCTION_DISABLE     (0x74)
 #define INTERSENSOR_CROSSTALK_TIMEOUT               (0x71)
 #define INTERSENSOR_CROSSTALK_MEASUREMENT_DELAY     (0x51)
+#define REGION_OF_INTEREST                          (0x70)
 
 /* Settings */
 #define FIRMWARE_VERSION                            (0x4e)
@@ -457,6 +458,30 @@ void set_gpio_mode_pwm()
   Wire.endTransmission();
 }
 
+void set_fov_27()
+{
+
+  Wire.beginTransmission(address);
+  Wire.write(REGION_OF_INTEREST);
+  Wire.write(0);
+  Wire.write(15);
+  Wire.write(15);
+  Wire.write(0);
+  Wire.endTransmission();
+}
+
+void set_fov_15()
+{
+
+  Wire.beginTransmission(address);
+  Wire.write(REGION_OF_INTEREST);
+  Wire.write(5);
+  Wire.write(10);
+  Wire.write(10);
+  Wire.write(5);
+  Wire.endTransmission();
+}
+
 void set_gpio_mode_measurement()
 {
 
@@ -678,6 +703,8 @@ void print_menu()
   Serial.println("k - custom_settings_write_default_profile");
   Serial.println("K - custom_settings_write_accurate_profile");
   Serial.println(". - addr_in_test");
+  Serial.println("[ - void set_fov_27");
+  Serial.println("] - void set_fov_15");
 
   Serial.print("Current address is: ");
   Serial.println(address, DEC);
@@ -869,6 +896,8 @@ void loop() {
     case 'k': custom_settings_write_default_profile(); break;
     case 'K': custom_settings_write_accurate_profile(); break;
     case '.': addr_in_test(); break;
+	case '[': set_fov_27(); break;
+	case ']': set_fov_27(); break;
 
 
     default: print_menu(); break;
