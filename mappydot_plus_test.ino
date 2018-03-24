@@ -463,10 +463,10 @@ void set_fov_27()
 
   Wire.beginTransmission(address);
   Wire.write(REGION_OF_INTEREST);
-  Wire.write(0);
-  Wire.write(15);
-  Wire.write(15);
-  Wire.write(0);
+  Wire.write((byte)0);
+  Wire.write((byte)15);
+  Wire.write((byte)15);
+  Wire.write((byte)0);
   Wire.endTransmission();
 }
 
@@ -475,10 +475,10 @@ void set_fov_15()
 
   Wire.beginTransmission(address);
   Wire.write(REGION_OF_INTEREST);
-  Wire.write(5);
-  Wire.write(10);
-  Wire.write(10);
-  Wire.write(5);
+  Wire.write((byte)5);
+  Wire.write((byte)10);
+  Wire.write((byte)10);
+  Wire.write((byte)5);
   Wire.endTransmission();
 }
 
