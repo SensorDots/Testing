@@ -27,6 +27,7 @@
 #define MEASUREMENT_BUDGET                          (0x42)
 #define SET_CONTINUOUS_RANGING_MODE                 (0x63)
 #define SET_SINGLE_RANGING_MODE                     (0x73)
+#define CHECK_INTERRUPT                             (0x49)
 
 /* Configuration */
 #define FILTERING_ENABLE                            (0x46)
@@ -509,6 +510,15 @@ void read() {
   Serial.print("Read: ");
   Serial.println(distance, DEC);
 }
+
+void interrupt_read() {
+
+  Wire.beginTransmission(address);
+  Wire.write(CHECK_INTERRUPT);
+  Wire.endTransmission(false); //repeated start
+  Wire.requestFrom(address,1, true); 
+  Serial.println(Wire.read(), DEC);
+}
 void test_no_restart_read() {
   Wire.beginTransmission(address);
   Wire.write(READ_DISTANCE);
@@ -705,6 +715,7 @@ void print_menu()
   Serial.println(". - addr_in_test");
   Serial.println("[ - set_fov_27");
   Serial.println("] - set_fov_15");
+  Serial.println("t - interrupt_read");
 
   Serial.print("Current address is: ");
   Serial.println(address, DEC);
@@ -898,6 +909,7 @@ void loop() {
     case '.': addr_in_test(); break;
 	case '[': set_fov_27(); break;
 	case ']': set_fov_27(); break;
+  case 't': interrupt_read(); break;
 
 
     default: print_menu(); break;
