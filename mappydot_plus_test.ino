@@ -28,6 +28,8 @@
 #define SET_CONTINUOUS_RANGING_MODE                 (0x63)
 #define SET_SINGLE_RANGING_MODE                     (0x73)
 #define CHECK_INTERRUPT                             (0x49)
+#define SIGMA_LIMIT_CHECK_VALUE                     (0x4C)
+#define SIGNAL_LIMIT_CHECK_VALUE                    (0x47)
 
 /* Configuration */
 #define FILTERING_ENABLE                            (0x46)
@@ -48,6 +50,7 @@
 #define INTERSENSOR_CROSSTALK_TIMEOUT               (0x71)
 #define INTERSENSOR_CROSSTALK_MEASUREMENT_DELAY     (0x51)
 #define REGION_OF_INTEREST                          (0x70)
+#define GET_OPTICAL_CENTER                          (0x50)
 
 /* Settings */
 #define FIRMWARE_VERSION                            (0x4e)
@@ -658,6 +661,16 @@ void test_settings_read() {
   Serial.println(Wire.read(),HEX);
 }
 
+void get_optical_center() {
+  Wire.beginTransmission(address);
+  Wire.write(GET_OPTICAL_CENTER);
+  Wire.endTransmission(false); //repeated start
+  Wire.requestFrom(address,2, true);
+  Serial.print(Wire.read(),HEX);
+  Serial.print(",");
+  Serial.println(Wire.read(),HEX);
+}
+
 void print_menu()
 {
   Serial.println("n - device_name_write");
@@ -715,7 +728,10 @@ void print_menu()
   Serial.println(". - addr_in_test");
   Serial.println("[ - set_fov_27");
   Serial.println("] - set_fov_15");
+  Serial.println("P - get_optical_center");
   Serial.println("t - interrupt_read");
+  Serial.println("< - signal_limit");
+  Serial.println("> - sigma_limit");
 
   Serial.print("Current address is: ");
   Serial.println(address, DEC);
@@ -816,7 +832,7 @@ void measurement_budget()
     i++;
     if (character == '\r' || character == '\n')
     {
-      if (atol(char_buffer) >= 20 && atol(char_buffer) <= 1000)
+      if (atol(char_buffer) >= 10 && atol(char_buffer) <= 1000)
       {
         budget = atoi(char_buffer);
         was_set = 1;
@@ -844,6 +860,93 @@ void measurement_budget()
   
 }
 
+void sigma_limit()
+{
+  char char_buffer[4] = {0};
+  uint8_t i = 0;
+  uint8_t was_set = 0;
+  uint16_t budget = 0;
+
+  Serial.print("Enter sigma limit (mm) >= 1 and <= 254): ");
+  while(i < 4){
+    while(Serial.available() == 0){}
+    char character = Serial.read();
+    Serial.print(character);
+    char_buffer[i] = character;
+    i++;
+    if (character == '\r' || character == '\n')
+    {
+      if (atol(char_buffer) >= 1 && atol(char_buffer) <= 254)
+      {
+        budget = atoi(char_buffer);
+        was_set = 1;
+      }
+      i = 4;
+    }
+  }
+  
+  Serial.println("");
+  
+  if (was_set)
+  {
+    Serial.print("Sigma set to: ");
+    Serial.println(budget, DEC);
+    uint8_t bytes[2];
+    mm_to_bytes(bytes, budget); //Uses the same byte format as this function
+    Wire.beginTransmission(address);
+    Wire.write(SIGMA_LIMIT_CHECK_VALUE);
+    Wire.write(bytes[0]);
+    Wire.endTransmission();
+  } else {
+    Serial.println("Sigma not set");
+  }
+  
+}
+
+
+void signal_limit()
+{
+  char char_buffer[5] = {0};
+  uint8_t i = 0;
+  uint8_t was_set = 0;
+  uint16_t budget = 0;
+
+  Serial.print("Enter signal limit kcps >= 1 and <= 1000): ");
+  while(i < 5){
+    while(Serial.available() == 0){}
+    char character = Serial.read();
+    Serial.print(character);
+    char_buffer[i] = character;
+    i++;
+    if (character == '\r' || character == '\n')
+    {
+      if (atol(char_buffer) >= 1 && atol(char_buffer) <= 1000)
+      {
+        budget = atoi(char_buffer);
+        was_set = 1;
+      }
+      i = 5;
+    }
+  }
+  
+  Serial.println("");
+  
+  if (was_set)
+  {
+    Serial.print("Signal set to: ");
+    Serial.println(budget, DEC);
+    uint8_t bytes[2];
+    mm_to_bytes(bytes, budget); //Uses the same byte format as this function
+    Wire.beginTransmission(address);
+    Wire.write(SIGNAL_LIMIT_CHECK_VALUE);
+    Wire.write(bytes[0]);
+    Wire.write(bytes[1]);
+    Wire.endTransmission();
+  } else {
+    Serial.println("Signal not set");
+  }
+  
+}
 
 void loop() {
   
@@ -910,6 +1013,9 @@ void loop() {
 	case '[': set_fov_27(); break;
 	case ']': set_fov_27(); break;
   case 't': interrupt_read(); break;
+  case '<': signal_limit(); break;
+  case '>': sigma_limit(); break;
+  case 'P': get_optical_center(); break;
 
 
     default: print_menu(); break;
