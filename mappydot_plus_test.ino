@@ -50,7 +50,6 @@
 #define INTERSENSOR_CROSSTALK_TIMEOUT               (0x71)
 #define INTERSENSOR_CROSSTALK_MEASUREMENT_DELAY     (0x51)
 #define REGION_OF_INTEREST                          (0x70)
-#define GET_OPTICAL_CENTER                          (0x50)
 
 /* Settings */
 #define FIRMWARE_VERSION                            (0x4e)
@@ -65,8 +64,6 @@
 #define VL53L1X_NOT_SHUTDOWN                        (0x48)
 #define VL53L1X_SHUTDOWN                            (0x68)
 #define READ_NONFILTERED_VALUE                      (0x6a)
-#define VL53L1X_PASSTHROUGH                         (0x70)
-#define CUSTOM_PROFILE_SETTINGS                     (0x6b)
 
 /* Super Advanced */
 #define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
@@ -75,7 +72,6 @@
 #define SHORT_RANGE                                 (0x73)
 #define MED_RANGE                                   (0x6d)
 #define LONG_RANGE                                  (0x6c)
-#define CUSTOM                                      (0x63)
 
 /* LED Modes */
 #define LED_ON                                      (0x6f)
@@ -125,40 +121,6 @@ void device_name_write() {
   Wire.endTransmission();
 }
 
-
-
-void custom_settings_write_default_profile() {
-  Wire.beginTransmission(address);
-  Wire.write(CUSTOM_PROFILE_SETTINGS);
-  Wire.write(0x01);
-  Wire.write(0x08);
-  Wire.write(0xD5);
-  Wire.write(0x19);
-  Wire.write(0x12);
-  Wire.write(0x00);
-  Wire.write(0x21);
-  Wire.write(0x0E);
-  Wire.write(0x0A);
-
-  Wire.endTransmission();
-}
-
-void custom_settings_write_accurate_profile() {
-  Wire.beginTransmission(address);
-  Wire.write(CUSTOM_PROFILE_SETTINGS);
-  Wire.write(0x00);
-  Wire.write(0x00);
-  Wire.write(0x00);
-  Wire.write(0x19);
-  Wire.write(0x12);
-  Wire.write(0x00);
-  Wire.write(0xc8);
-  Wire.write(0x0E);
-  Wire.write(0x0A);
-
-  Wire.endTransmission();
-}
-
 /*
 #define CALIBRATE_DISTANCE_OFFSET                   (0x61)
 #define CALIBRATE_CROSSTALK                         (0x78)
@@ -192,15 +154,6 @@ void measurement_mode_long()
   Wire.write(LONG_RANGE);
   Wire.endTransmission();
 }
-
-/*void measurement_mode_custom()
-{
-  Wire.beginTransmission(address);
-  Wire.write(RANGING_MEASUREMENT_MODE);
-  Wire.write(CUSTOM);
-  Wire.endTransmission();
-}*/
-
 
 void addr_in_test()
 {
@@ -479,10 +432,10 @@ void set_fov_15()
 
   Wire.beginTransmission(address);
   Wire.write(REGION_OF_INTEREST);
-  Wire.write((byte)5);
-  Wire.write((byte)10);
-  Wire.write((byte)10);
-  Wire.write((byte)5);
+  Wire.write((byte)0);
+  Wire.write((byte)4);
+  Wire.write((byte)4);
+  Wire.write((byte)0);
   Wire.endTransmission();
 }
 
@@ -601,22 +554,12 @@ void test_device_name() {
   Wire.endTransmission(false); //repeated start
   Wire.requestFrom(address,16, true);
   Serial.print("Name: ");
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
+  int i = 0;
+  while (i < 16) {
+    Serial.write(Wire.read());
+    i++;
+  }
+
   Serial.println("");
 }
 void test_settings_read() {
@@ -624,50 +567,15 @@ void test_settings_read() {
   Wire.beginTransmission(address);
   Wire.write(READ_CURRENT_SETTINGS);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,16, true);
+  Wire.requestFrom(address,23, true);
   Serial.print("Settings: ");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.println(Wire.read(),HEX);
-}
+  int i = 0;
+  while (i < 22) {
+    Serial.print(Wire.read(),HEX);
+    Serial.print(",");
+    i++;
+  }
 
-void get_optical_center() {
-  Wire.beginTransmission(address);
-  Wire.write(GET_OPTICAL_CENTER);
-  Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,2, true);
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
   Serial.println(Wire.read(),HEX);
 }
 
@@ -709,7 +617,6 @@ void print_menu()
   Serial.println("H - measurement_mode_med");
   Serial.println("L - measurement_mode_long");
   Serial.println("A - measurement_budget");
-  //Serial.println("c - measurement_mode_custom");
   Serial.println("I - intersensor_crosstalk_enable");
   Serial.println("i - intersensor_crosstalk_disable");
   Serial.println("V - reset_VL53L1X");
@@ -723,12 +630,9 @@ void print_menu()
   Serial.println("y - averaging_disable");
   Serial.println("- - change_address");
   Serial.println("? - calibration_routine");
-  Serial.println("k - custom_settings_write_default_profile");
-  Serial.println("K - custom_settings_write_accurate_profile");
   Serial.println(". - addr_in_test");
   Serial.println("[ - set_fov_27");
-  Serial.println("] - set_fov_15");
-  Serial.println("P - get_optical_center");
+  Serial.println("] - set_fov_16");
   Serial.println("t - interrupt_read");
   Serial.println("< - signal_limit");
   Serial.println("> - sigma_limit");
@@ -1006,16 +910,12 @@ void loop() {
     case 'y': averaging_disable(); break;
     case '-': change_address(); break;
     case '?': calibration_routine(); break;
-    //case 'c': measurement_mode_custom(); break;
-    case 'k': custom_settings_write_default_profile(); break;
-    case 'K': custom_settings_write_accurate_profile(); break;
     case '.': addr_in_test(); break;
 	case '[': set_fov_27(); break;
-	case ']': set_fov_27(); break;
+	case ']': set_fov_15(); break;
   case 't': interrupt_read(); break;
   case '<': signal_limit(); break;
   case '>': sigma_limit(); break;
-  case 'P': get_optical_center(); break;
 
 
     default: print_menu(); break;

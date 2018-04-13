@@ -60,7 +60,6 @@
 #define VL53L0X_NOT_SHUTDOWN                        (0x48)
 #define VL53L0X_SHUTDOWN                            (0x68)
 #define READ_NONFILTERED_VALUE                      (0x6a)
-#define VL53L0X_PASSTHROUGH                         (0x70)
 #define CUSTOM_PROFILE_SETTINGS                     (0x6b)
 
 /* Super Advanced */
@@ -581,22 +580,11 @@ void test_device_name() {
   Wire.endTransmission(false); //repeated start
   Wire.requestFrom(address,16, true);
   Serial.print("Name: ");
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
-  Serial.write(Wire.read());
+  int i = 0;
+  while (i < 16) {
+    Serial.write(Wire.read());
+    i++;
+  }
   Serial.println("");
 }
 void test_settings_read() {
@@ -606,36 +594,12 @@ void test_settings_read() {
   Wire.endTransmission(false); //repeated start
   Wire.requestFrom(address,16, true);
   Serial.print("Settings: ");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
-  Serial.print(Wire.read(),HEX);
-  Serial.print(",");
+  int i = 0;
+  while (i < 15) {
+    Serial.print(Wire.read(),HEX);
+    Serial.print(",");
+    i++;
+  }
   Serial.println(Wire.read(),HEX);
 }
 
