@@ -64,6 +64,8 @@
 #define VL53L1X_NOT_SHUTDOWN                        (0x48)
 #define VL53L1X_SHUTDOWN                            (0x68)
 #define READ_NONFILTERED_VALUE                      (0x6a)
+#define AMBIENT_RATE_RETURN                         (0x41)
+#define SIGNAL_RATE_RETURN                          (0x4A)
 
 /* Super Advanced */
 #define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
@@ -122,12 +124,12 @@ void device_name_write() {
 }
 
 /*
-#define CALIBRATE_DISTANCE_OFFSET                   (0x61)
-#define CALIBRATE_CROSSTALK                         (0x78)
-#define CALIBRATE_SPAD                              (0x75)
-#define TEMPERATURE_CALIBRATION                     (0x55)
-#define INTERSENSOR_CROSSTALK_TIMEOUT               (0x71)
-#define INTERSENSOR_CROSSTALK_MEASUREMENT_DELAY     (0x51)
+  #define CALIBRATE_DISTANCE_OFFSET                   (0x61)
+  #define CALIBRATE_CROSSTALK                         (0x78)
+  #define CALIBRATE_SPAD                              (0x75)
+  #define TEMPERATURE_CALIBRATION                     (0x55)
+  #define INTERSENSOR_CROSSTALK_TIMEOUT               (0x71)
+  #define INTERSENSOR_CROSSTALK_MEASUREMENT_DELAY     (0x51)
 */
 
 void measurement_mode_short()
@@ -174,7 +176,7 @@ void intersensor_crosstalk_disable()
   Wire.beginTransmission(address);
   Wire.write(INTERSENSOR_CROSSTALK_REDUCTION_DISABLE);
   Wire.endTransmission();
-  
+
 }
 
 void reset_VL53L1X()
@@ -215,28 +217,28 @@ void averaging_samples_10()
 }
 void filtering_enable()
 {
-    Wire.beginTransmission(address);
+  Wire.beginTransmission(address);
   Wire.write(FILTERING_ENABLE);
   Wire.endTransmission();
 }
 
 void filtering_disable()
 {
-    Wire.beginTransmission(address);
+  Wire.beginTransmission(address);
   Wire.write(FILTERING_DISABLE);
   Wire.endTransmission();
 }
 
 void averaging_enable()
 {
-    Wire.beginTransmission(address);
+  Wire.beginTransmission(address);
   Wire.write(AVERAGING_ENABLE);
   Wire.endTransmission();
 }
 
 void averaging_disable()
 {
-    Wire.beginTransmission(address);
+  Wire.beginTransmission(address);
   Wire.write(AVERAGING_DISABLE);
   Wire.endTransmission();
 }
@@ -280,13 +282,13 @@ void write_as_startup_settings()
 
 void mm_to_bytes(uint8_t *bytes, uint16_t mm)
 {
-    bytes[0] = (mm >> 8 & 0xFF);
-    bytes[1] = (mm & 0xFF);
+  bytes[0] = (mm >> 8 & 0xFF);
+  bytes[1] = (mm & 0xFF);
 }
 
 void enter_factory()
 {
-  #define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
+#define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
   Wire.beginTransmission(address);
   Wire.write(ENTER_FACTORY_MODE);
   Wire.write('!');
@@ -427,15 +429,15 @@ void set_fov_27()
   Wire.endTransmission();
 }
 
-void set_fov_15()
+void set_fov_16()
 {
 
   Wire.beginTransmission(address);
   Wire.write(REGION_OF_INTEREST);
-  Wire.write((byte)0);
-  Wire.write((byte)4);
-  Wire.write((byte)4);
-  Wire.write((byte)0);
+  Wire.write((byte)5);
+  Wire.write((byte)10);
+  Wire.write((byte)10);
+  Wire.write((byte)5);
   Wire.endTransmission();
 }
 
@@ -451,7 +453,7 @@ void set_gpio_mode_measurement()
 void simple_read() {
   /* Test simple read (after previous write too) */
   Wire.requestFrom(address, 2);
-  distance = Wire.read() << 8; distance |= Wire.read(); 
+  distance = Wire.read() << 8; distance |= Wire.read();
   Serial.print("Simple: ");
   Serial.println(distance, DEC);
 }
@@ -461,10 +463,32 @@ void read() {
   Wire.beginTransmission(address);
   Wire.write(READ_DISTANCE);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,2, true); 
-  distance = Wire.read() << 8; distance |= Wire.read(); 
+  Wire.requestFrom(address, 2, true);
+  distance = Wire.read() << 8; distance |= Wire.read();
   Serial.print("Read: ");
   Serial.println(distance, DEC);
+}
+
+void ambient_rate_return() {
+  /* Test Read Distance */
+  Wire.beginTransmission(address);
+  Wire.write(AMBIENT_RATE_RETURN);
+  Wire.endTransmission(false); //repeated start
+  Wire.requestFrom(address, 2, true);
+  uint16_t rate;
+  rate = Wire.read() << 8; rate |= Wire.read();
+  Serial.println(rate, DEC);
+}
+
+void signal_rate_return() {
+  /* Test Read Distance */
+  Wire.beginTransmission(address);
+  Wire.write(SIGNAL_RATE_RETURN);
+  Wire.endTransmission(false); //repeated start
+  Wire.requestFrom(address, 2, true);
+  uint16_t rate;
+  rate = Wire.read() << 8; rate |= Wire.read();
+  Serial.println(rate, DEC);
 }
 
 void interrupt_read() {
@@ -472,25 +496,25 @@ void interrupt_read() {
   Wire.beginTransmission(address);
   Wire.write(CHECK_INTERRUPT);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,1, true); 
+  Wire.requestFrom(address, 1, true);
   Serial.println(Wire.read(), DEC);
 }
 void test_no_restart_read() {
   Wire.beginTransmission(address);
   Wire.write(READ_DISTANCE);
   Wire.endTransmission(); //repeated start
-  Wire.requestFrom(address,2); 
-  distance = Wire.read() << 8; distance |= Wire.read(); 
+  Wire.requestFrom(address, 2);
+  distance = Wire.read() << 8; distance |= Wire.read();
   Serial.print("Read(NRS): ");
   Serial.println(distance, DEC);
 }
-void test_non_filtered_distance() {  
+void test_non_filtered_distance() {
   /* Test Non Filtered Distance */
   Wire.beginTransmission(address);
   Wire.write(READ_NONFILTERED_VALUE);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,3, true);
-  distance = Wire.read() << 8; distance |= Wire.read(); 
+  Wire.requestFrom(address, 3, true);
+  distance = Wire.read() << 8; distance |= Wire.read();
   Wire.read();
   Serial.print("NonFilt: ");
   Serial.println(distance, DEC);
@@ -500,20 +524,20 @@ void too_many_bytes() {
   Wire.beginTransmission(address);
   Wire.write(READ_DISTANCE);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,3, true);
+  Wire.requestFrom(address, 3, true);
   Serial.print("TooManyBytes: ");
-  Serial.print(Wire.read(),HEX);
+  Serial.print(Wire.read(), HEX);
   Serial.print(",");
-  Serial.print(Wire.read(),HEX);
+  Serial.print(Wire.read(), HEX);
   Serial.print(",");
-  Serial.println(Wire.read(),HEX);
+  Serial.println(Wire.read(), HEX);
 }
 void test_error_code() {
   /* Test Error Code */
   Wire.beginTransmission(address);
   Wire.write(READ_ERROR_CODE);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,1, true); 
+  Wire.requestFrom(address, 1, true);
   buff = Wire.read();
   Serial.print("ErrorCode: ");
   Serial.println(buff, DEC);
@@ -523,7 +547,7 @@ void test_distance_accuracy() {
   Wire.beginTransmission(address);
   Wire.write(READ_ACCURACY);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,2, true); 
+  Wire.requestFrom(address, 2, true);
   distance = Wire.read() << 8 | Wire.read();
   Serial.print("Accuracy: ");
   Serial.println(distance, DEC);
@@ -533,7 +557,7 @@ void test_firmware_version() {
   Wire.beginTransmission(address);
   Wire.write(FIRMWARE_VERSION);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,10, true);
+  Wire.requestFrom(address, 10, true);
   Serial.print("Version: ");
   Serial.write(Wire.read());
   Serial.write(Wire.read());
@@ -552,7 +576,7 @@ void test_device_name() {
   Wire.beginTransmission(address);
   Wire.write(DEVICE_NAME);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,16, true);
+  Wire.requestFrom(address, 16, true);
   Serial.print("Name: ");
   int i = 0;
   while (i < 16) {
@@ -563,20 +587,20 @@ void test_device_name() {
   Serial.println("");
 }
 void test_settings_read() {
-    /* Test Settings Read */
+  /* Test Settings Read */
   Wire.beginTransmission(address);
   Wire.write(READ_CURRENT_SETTINGS);
   Wire.endTransmission(false); //repeated start
-  Wire.requestFrom(address,23, true);
+  Wire.requestFrom(address, 23, true);
   Serial.print("Settings: ");
   int i = 0;
   while (i < 22) {
-    Serial.print(Wire.read(),HEX);
+    Serial.print(Wire.read(), HEX);
     Serial.print(",");
     i++;
   }
 
-  Serial.println(Wire.read(),HEX);
+  Serial.println(Wire.read(), HEX);
 }
 
 void print_menu()
@@ -636,10 +660,12 @@ void print_menu()
   Serial.println("t - interrupt_read");
   Serial.println("< - signal_limit");
   Serial.println("> - sigma_limit");
+  Serial.println("{ - signal_rate_return");
+  Serial.println("} - ambient_rate_return");
 
   Serial.print("Current address is: ");
   Serial.println(address, DEC);
-  
+
   Serial.println("");
 
 }
@@ -647,7 +673,7 @@ void print_menu()
 void calibration_routine()
 {
   set_led_mode_off();
-  
+
   Wire.beginTransmission(address);
   Wire.write(CALIBRATE_SPAD);
   Wire.endTransmission();
@@ -679,10 +705,10 @@ void setup() {
   address = 0x08;
 }
 
-      /*Wire.beginTransmission(address);
-      Wire.write(READ_DISTANCE);
-      Wire.endTransmission();
-            delay(2);*/
+/*Wire.beginTransmission(address);
+  Wire.write(READ_DISTANCE);
+  Wire.endTransmission();
+      delay(2);*/
 
 void change_address()
 {
@@ -691,8 +717,8 @@ void change_address()
   uint8_t was_set = 0;
 
   Serial.print("Enter I2C address >= 8 and =< 112): ");
-  while(i < 4){
-    while(Serial.available() == 0){}
+  while (i < 4) {
+    while (Serial.available() == 0) {}
     char character = Serial.read();
     Serial.print(character);
     char_buffer[i] = character;
@@ -707,9 +733,9 @@ void change_address()
       i = 4;
     }
   }
-  
+
   Serial.println("");
-  
+
   if (was_set)
   {
     Serial.print("Address set to: ");
@@ -717,7 +743,7 @@ void change_address()
   } else {
     Serial.println("Address not set");
   }
-  
+
 }
 
 void measurement_budget()
@@ -728,8 +754,8 @@ void measurement_budget()
   uint16_t budget = 0;
 
   Serial.print("Enter measurement budget (ms) >= 20 and <= 1000): ");
-  while(i < 5){
-    while(Serial.available() == 0){}
+  while (i < 5) {
+    while (Serial.available() == 0) {}
     char character = Serial.read();
     Serial.print(character);
     char_buffer[i] = character;
@@ -744,9 +770,9 @@ void measurement_budget()
       i = 5;
     }
   }
-  
+
   Serial.println("");
-  
+
   if (was_set)
   {
     Serial.print("Budget set to: ");
@@ -761,7 +787,7 @@ void measurement_budget()
   } else {
     Serial.println("Budget not set");
   }
-  
+
 }
 
 void sigma_limit()
@@ -772,8 +798,8 @@ void sigma_limit()
   uint16_t budget = 0;
 
   Serial.print("Enter sigma limit (mm) >= 1 and <= 254): ");
-  while(i < 4){
-    while(Serial.available() == 0){}
+  while (i < 4) {
+    while (Serial.available() == 0) {}
     char character = Serial.read();
     Serial.print(character);
     char_buffer[i] = character;
@@ -788,9 +814,9 @@ void sigma_limit()
       i = 4;
     }
   }
-  
+
   Serial.println("");
-  
+
   if (was_set)
   {
     Serial.print("Sigma set to: ");
@@ -804,7 +830,7 @@ void sigma_limit()
   } else {
     Serial.println("Sigma not set");
   }
-  
+
 }
 
 
@@ -816,8 +842,8 @@ void signal_limit()
   uint16_t budget = 0;
 
   Serial.print("Enter signal limit kcps >= 1 and <= 1000): ");
-  while(i < 5){
-    while(Serial.available() == 0){}
+  while (i < 5) {
+    while (Serial.available() == 0) {}
     char character = Serial.read();
     Serial.print(character);
     char_buffer[i] = character;
@@ -832,9 +858,9 @@ void signal_limit()
       i = 5;
     }
   }
-  
+
   Serial.println("");
-  
+
   if (was_set)
   {
     Serial.print("Signal set to: ");
@@ -849,16 +875,16 @@ void signal_limit()
   } else {
     Serial.println("Signal not set");
   }
-  
+
 }
 
 void loop() {
-  
+
   while (!Serial) {
     // Wait for serial port
   }
-        //digitalWrite(ledPin, HIGH);   // set the LED on
-  while(Serial.available() == 0){}
+  //digitalWrite(ledPin, HIGH);   // set the LED on
+  while (Serial.available() == 0) {}
   switch (Serial.read())
   {
     case 'n': device_name_write(); break;
@@ -911,20 +937,23 @@ void loop() {
     case '-': change_address(); break;
     case '?': calibration_routine(); break;
     case '.': addr_in_test(); break;
-	case '[': set_fov_27(); break;
-	case ']': set_fov_15(); break;
-  case 't': interrupt_read(); break;
-  case '<': signal_limit(); break;
-  case '>': sigma_limit(); break;
+    case '[': set_fov_27(); break;
+    case ']': set_fov_16(); break;
+    case 't': interrupt_read(); break;
+    case '<': signal_limit(); break;
+    case '>': sigma_limit(); break;
+    case '{': signal_rate_return(); break;
+    case '}': ambient_rate_return(); break;
+
 
 
     default: print_menu(); break;
   }
-  
-      
+
+
   delay(20);
-//digitalWrite(ledPin, LOW); // set the LED off
- 
+  //digitalWrite(ledPin, LOW); // set the LED off
+
 }
 
 
