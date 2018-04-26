@@ -698,12 +698,6 @@ void calibration_routine()
 {
   set_led_mode_off();
 
-  Wire.beginTransmission(address);
-  Wire.write(CALIBRATE_SPAD);
-  Wire.endTransmission();
-
-  delay(2000);
-
   uint8_t calib_dist = 103;
   uint8_t dist_bytes[2];
   mm_to_bytes(dist_bytes, calib_dist);
