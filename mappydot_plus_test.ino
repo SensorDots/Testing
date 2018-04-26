@@ -688,6 +688,7 @@ void calibration_routine()
   Wire.write(dist_bytes[0]);
   Wire.write(dist_bytes[1]);
   Wire.endTransmission();
+  delay(12000);
   set_led_mode_pwm();
   Serial.println("Calibration Complete");
 }
