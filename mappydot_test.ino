@@ -697,8 +697,14 @@ void print_menu()
 void calibration_routine()
 {
   set_led_mode_off();
+   
+  Wire.beginTransmission(address);
+  Wire.write(CALIBRATE_SPAD);
+  Wire.endTransmission();
 
-  uint16_t calib_dist = 103;
+  delay(1000);
+
+  uint16_t calib_dist = 100;
   uint8_t dist_bytes[2];
   mm_to_bytes(dist_bytes, calib_dist);
   Wire.beginTransmission(address);
