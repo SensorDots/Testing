@@ -697,14 +697,14 @@ void print_menu()
 void calibration_routine()
 {
   set_led_mode_off();
-
+   
   Wire.beginTransmission(address);
   Wire.write(CALIBRATE_SPAD);
   Wire.endTransmission();
 
-  delay(2000);
+  delay(1000);
 
-  uint8_t calib_dist = 103;
+  uint16_t calib_dist = 100;
   uint8_t dist_bytes[2];
   mm_to_bytes(dist_bytes, calib_dist);
   Wire.beginTransmission(address);
@@ -712,6 +712,7 @@ void calibration_routine()
   Wire.write(dist_bytes[0]);
   Wire.write(dist_bytes[1]);
   Wire.endTransmission();
+  delay(12000);
   set_led_mode_pwm();
   Serial.println("Calibration Complete");
 }
