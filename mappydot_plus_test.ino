@@ -66,6 +66,8 @@
 #define READ_NONFILTERED_VALUE                      (0x6a)
 #define AMBIENT_RATE_RETURN                         (0x41)
 #define SIGNAL_RATE_RETURN                          (0x4A)
+#define ENABLE_CROSSTALK_CALIBRATION                (0x4B)
+#define DISABLE_CROSSTALK_CALIBRATION               (0x6B)
 
 /* Super Advanced */
 #define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
@@ -89,7 +91,8 @@
 #define GPIO_PWM_ENABLED                            (0x70)
 #define GPIO_MEASUREMENT_INTERRUPT                  (0x6d)
 
-#include <i2c_t3.h> //Teensy 3 I2C library.
+//#include <i2c_t3.h> //Teensy 3 I2C library.
+#include <Wire.h>
 
 #define BUFFER_SIZE 30
 
@@ -286,9 +289,10 @@ void mm_to_bytes(uint8_t *bytes, uint16_t mm)
   bytes[1] = (mm & 0xFF);
 }
 
+#define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
 void enter_factory()
 {
-#define ENTER_FACTORY_MODE                          (0x23) //"#"//"!#!#!#"
+
   Wire.beginTransmission(address);
   Wire.write(ENTER_FACTORY_MODE);
   Wire.write('!');
@@ -299,6 +303,23 @@ void enter_factory()
   Wire.write('#');
   Wire.endTransmission();
 }
+
+#define WIPE_ALL_SETTINGS                          (0x3c) //"<"//"><><><"
+void erase_flash()
+{
+
+  Wire.beginTransmission(address);
+  Wire.write(WIPE_ALL_SETTINGS);
+  Wire.write('>');
+  Wire.write('<');
+  Wire.write('>');
+  Wire.write('<');
+  Wire.write('>');
+  Wire.write('<');
+  Wire.endTransmission();
+  Serial.println("Flash Erased");
+}
+
 
 void set_gpio_threshold_100()
 {
@@ -542,6 +563,18 @@ void test_error_code() {
   Serial.print("ErrorCode: ");
   Serial.println(buff, DEC);
 }
+void enable_crosstalk() {
+    Wire.beginTransmission(address);
+  Wire.write(ENABLE_CROSSTALK_CALIBRATION);
+  Wire.endTransmission();
+  
+}
+void disable_crosstalk() {
+  Wire.beginTransmission(address);
+  Wire.write(DISABLE_CROSSTALK_CALIBRATION);
+  Wire.endTransmission();
+  
+}
 void test_distance_accuracy() {
   /* Test Distance Accuracy */
   Wire.beginTransmission(address);
@@ -662,6 +695,9 @@ void print_menu()
   Serial.println("> - sigma_limit");
   Serial.println("{ - signal_rate_return");
   Serial.println("} - ambient_rate_return");
+  Serial.println("% - enable_crosstalk");
+  Serial.println("^ - disable_crosstalk");
+  Serial.println("_ - erase_flash");
 
   Serial.print("Current address is: ");
   Serial.println(address, DEC);
@@ -674,13 +710,15 @@ void calibration_routine()
 {
   set_led_mode_off();
 
-  Wire.beginTransmission(address);
+  delay(500);
+
+  /*Wire.beginTransmission(address);
   Wire.write(CALIBRATE_SPAD);
   Wire.endTransmission();
 
-  delay(2000);
+  delay(500);*/
 
-  uint8_t calib_dist = 103;
+  uint16_t calib_dist = 2200;
   uint8_t dist_bytes[2];
   mm_to_bytes(dist_bytes, calib_dist);
   Wire.beginTransmission(address);
@@ -688,16 +726,19 @@ void calibration_routine()
   Wire.write(dist_bytes[0]);
   Wire.write(dist_bytes[1]);
   Wire.endTransmission();
-  set_led_mode_pwm();
+  delay(10000);
+  //set_led_mode_pwm();
   Serial.println("Calibration Complete");
 }
 void setup() {
 
-  Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_EXT, I2C_RATE_100);
+  //Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_EXT, I2C_RATE_100);
+  Wire.begin();
+  Wire.setClock(100000);
   Serial.begin(115200);
 
   //Stop bus locking up when I2C glitches occur.
-  Wire.setDefaultTimeout(10000);
+  //Wire.setDefaultTimeout(10000);
 
   // initialize the LED pin as an output.
   pinMode(ledPin, OUTPUT);
@@ -753,7 +794,7 @@ void measurement_budget()
   uint8_t was_set = 0;
   uint16_t budget = 0;
 
-  Serial.print("Enter measurement budget (ms) >= 20 and <= 1000): ");
+  Serial.print("Enter measurement budget (ms) >= 10 and <= 1000): ");
   while (i < 5) {
     while (Serial.available() == 0) {}
     char character = Serial.read();
@@ -944,6 +985,9 @@ void loop() {
     case '>': sigma_limit(); break;
     case '{': signal_rate_return(); break;
     case '}': ambient_rate_return(); break;
+    case '%': enable_crosstalk(); break;
+    case '^': disable_crosstalk(); break;
+    case '_': erase_flash(); break;
 
 
 
@@ -951,9 +995,7 @@ void loop() {
   }
 
 
-  delay(20);
+  delay(10);
   //digitalWrite(ledPin, LOW); // set the LED off
 
 }
-
-
